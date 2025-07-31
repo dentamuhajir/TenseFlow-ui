@@ -1,6 +1,8 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const POS_EXPLANATIONS: Record<string, string> = {
   PRP: 'Pronoun: replaces a noun (e.g., she, he, they).',
@@ -27,13 +29,30 @@ export default function Prototype() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const firstRender = useRef(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
     }, 5000);
+
+    AOS.init({
+      duration: 600,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 80,
+    });
+
+    // after initializing once, disable future AOS-triggered animations by
+    // marking firstRender false on next tick so dynamic replacements don't animate
+    requestAnimationFrame(() => {
+      firstRender.current = false;
+    });
+
     return () => clearTimeout(timeout);
   }, []);
+
+  // No need to refresh AOS for content after loading since we don't want their animations.
 
   const messages = [
     {
@@ -62,10 +81,35 @@ export default function Prototype() {
     <div className={`bg-neutral-200 animate-pulse rounded ${className}`} />
   );
 
+  // headline animation setup
+  const headline = 'TenseFlow - Break Down Grammar. Build Up Skill.';
+  const words = headline.split(' ');
+
+  const wordVariants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.12,
+        ease: 'easeOut',
+      },
+    }),
+  };
+
+  // Helper to conditionally apply AOS only on first mount
+  const maybeAos = (attrs: { [k: string]: any }) => {
+    if (firstRender.current) return attrs;
+    return {};
+  };
+
   return (
     <main className="flex w-screen h-screen bg-gradient-to-tr from-gray-100 to-neutral-200">
       {/* Left POS Sidebar */}
-      <aside className="w-[300px] bg-white border-r border-neutral-300 p-4 overflow-y-auto">
+      <aside
+        className="w-[300px] bg-white border-r border-neutral-300 p-4 overflow-y-auto"
+        {...maybeAos({ 'data-aos': 'fade-right' })}
+      >
         <h2 className="text-xl font-semibold text-pink-600 mb-4">Part of Speech</h2>
         <div className="space-y-4">
           {loading
@@ -79,6 +123,9 @@ export default function Prototype() {
                   className={`border-l-4 pl-3 ${
                     selectedTag === tag ? 'border-pink-600 bg-pink-50' : 'border-transparent'
                   }`}
+                  {...(firstRender.current
+                    ? { 'data-aos': 'fade-up', 'data-aos-delay': '50' }
+                    : {})}
                 >
                   <h3 className="font-bold text-sm text-neutral-700">{tag}</h3>
                   <p className="text-sm text-neutral-600">{explanation}</p>
@@ -90,13 +137,30 @@ export default function Prototype() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col items-center py-8 overflow-y-auto px-4">
         <div className="w-full max-w-2xl">
-          <h1 className="bg-gradient-to-r from-black via-pink-500 to-violet-800 inline-block text-transparent bg-clip-text font-bold text-4xl leading-tight mb-6">
-            TenseFlow - Break Down Grammar. Build Up Skill.
+          {/* Animated Headline */}
+          <h1 className="mb-6" {...maybeAos({ 'data-aos': 'fade-down' })}>
+            <div className="inline-block bg-gradient-to-r from-black via-pink-500 to-violet-800 text-transparent bg-clip-text font-bold text-4xl leading-tight">
+              <div className="flex flex-wrap gap-1">
+                {words.map((w, i) => (
+                  <motion.span
+                    key={i}
+                    custom={i}
+                    initial="hidden"
+                    animate="visible"
+                    variants={wordVariants}
+                    className="inline-block"
+                  >
+                    {w}
+                    {i !== words.length - 1 && '\u00A0'}
+                  </motion.span>
+                ))}
+              </div>
+            </div>
           </h1>
 
           <div className="flex flex-col gap-6 mb-6">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-4" {...maybeAos({ 'data-aos': 'fade-up' })}>
                 <SkeletonBox className="h-10 w-1/2" />
                 <SkeletonBox className="h-16 w-full" />
                 <div className="flex gap-2 flex-wrap">
@@ -141,7 +205,10 @@ export default function Prototype() {
           </div>
 
           {/* Textarea Input */}
-          <div className="bg-white h-32 rounded-2xl shadow-md border border-neutral-300 relative hover:shadow-lg transition-all">
+          <div
+            className="bg-white h-32 rounded-2xl shadow-md border border-neutral-300 relative hover:shadow-lg transition-all"
+            // no AOS after load
+          >
             <textarea
               className="w-full h-full p-4 text-sm text-neutral-700 rounded-2xl focus:outline-none resize-none"
               placeholder="Type a sentence like: She was watching TV when I called her."
@@ -171,7 +238,10 @@ export default function Prototype() {
       </div>
 
       {/* Right Tense Guide Sidebar */}
-      <aside className="w-[300px] bg-white border-l border-neutral-300 p-4 overflow-y-auto">
+      <aside
+        className="w-[300px] bg-white border-l border-neutral-300 p-4 overflow-y-auto"
+        {...maybeAos({ 'data-aos': 'fade-left' })}
+      >
         <h2 className="text-xl font-semibold text-violet-600 mb-4">Tense Guide</h2>
         {loading
           ? Array.from({ length: 1 }).map((_, i) => (
