@@ -34,7 +34,7 @@ export default function Prototype() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 2000);
 
     AOS.init({
       duration: 600,
