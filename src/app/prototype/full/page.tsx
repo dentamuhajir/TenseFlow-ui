@@ -74,9 +74,12 @@ export default function Prototype() {
       <div className="flex-1 flex flex-col items-center py-8 overflow-y-auto px-4">
         <div className="w-full max-w-2xl">
           <h1 className="bg-gradient-to-r from-black via-pink-500 to-violet-800 inline-block text-transparent bg-clip-text font-bold text-4xl leading-tight mb-6">
-            {/* TenseFlow - Explore Your English Grammar */}
+            {/* TenseFlow - Explore Your English Grammar  */}
             TenseFlow - Break Down Grammar. Build Up Skill.
-          </h1>
+          </h1> 
+
+
+
 
           <div className="flex flex-col gap-6 mb-6">
             {messages.map((msg, idx) => (
