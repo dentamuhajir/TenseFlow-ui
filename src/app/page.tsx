@@ -95,7 +95,7 @@ function AnimatedHeadline() {
 export default function Prototype() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [input, setInput] = useState<string>('She has been reading a book since morning.');
+  const [input, setInput] = useState<string>('');
   const [messages, setMessages] = useState<Message[]>(DEFAULT_MESSAGES);
   const [initialLoading, setInitialLoading] = useState<boolean>(true);
   const [fetching, setFetching] = useState<boolean>(false);
